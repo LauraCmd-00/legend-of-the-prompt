@@ -4,8 +4,8 @@ export const narrationMetaSchema = z.object({
   theme: z.string(),
   chapter: z.number(),
   sub_chapter: z.number(),
-  scene_type: z.enum(['exploration', 'dialogue', 'combat_intro', 'puzzle', 'moral_dilemma', 'revelation', 'boss_intro', 'resolution']),
-  mood: z.enum(['tense', 'calm', 'epic', 'mysterious', 'dark', 'hopeful', 'humorous']),
+  scene_type: z.string(),
+  mood: z.string(),
 });
 
 export const narrationChoiceSchema = z.object({
@@ -13,7 +13,7 @@ export const narrationChoiceSchema = z.object({
   label: z.string(),
   consequence_preview: z.string(),
   is_premium: z.boolean(),
-  consequence_type: z.enum(['combat', 'exploration', 'loot', 'rest', 'story', 'detour', 'ally', 'betrayal']),
+  consequence_type: z.string(),
 });
 
 export const narrationResponseSchema = z.object({
