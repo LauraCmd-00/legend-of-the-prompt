@@ -19,15 +19,20 @@ export default function GamePage() {
   useEffect(() => {
     if (!gameId) return;
 
-    async function load() {
+    async function loadGameAndNarration() {
       setLoading(true);
       try {
-        const state = await api.loadGame(gameId!);
-        setGameState(state);
+        // Load game state if needed
+        if (!gameState || gameState.id !== gameId) {
+          const state = await api.loadGame(gameId!);
+          setGameState(state);
+        }
 
-        // Get initial narration
-        const narration = await api.getNarration(gameId!);
-        setNarration(narration);
+        // Always fetch narration if we don't have one
+        if (!currentNarration) {
+          const narration = await api.getNarration(gameId!);
+          setNarration(narration);
+        }
       } catch (err) {
         console.error('Failed to load game:', err);
       } finally {
@@ -35,8 +40,8 @@ export default function GamePage() {
       }
     }
 
-    if (!gameState || gameState.id !== gameId) {
-      load();
+    if (!gameState || gameState.id !== gameId || !currentNarration) {
+      loadGameAndNarration();
     }
   }, [gameId]);
 
