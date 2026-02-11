@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { Mistral } from '@mistralai/mistralai';
 import { env } from '../../config/env';
 import { buildSystemPromptDetailed } from './prompts/system';
 import { buildNarrationUserPrompt } from './prompts/narration';
@@ -6,11 +6,11 @@ import { buildCombatNarrationPrompt } from './prompts/combat-narration';
 import type { SceneContext, NarrationResponse } from '@txtrpg/shared';
 import { narrationResponseSchema, transformNarrationResponse } from './types';
 
-const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
+const mistral = new Mistral({ apiKey: env.MISTRAL_API_KEY });
 
 export interface ChatMessage {
-  role: 'user' | 'model';
-  parts: Array<{ text: string }>;
+  role: 'user' | 'assistant';
+  content: string;
 }
 
 export async function generateNarration(
@@ -21,24 +21,23 @@ export async function generateNarration(
   const systemPrompt = buildSystemPromptDetailed(context);
   const userPrompt = buildNarrationUserPrompt(context, chosenAction);
 
-  const model = genAI.getGenerativeModel({
-    model: env.GEMINI_MODEL,
-    systemInstruction: systemPrompt,
-    generationConfig: {
-      responseMimeType: 'application/json',
-      maxOutputTokens: 2000,
-      temperature: 0.85,
-    },
-  });
-
   // Keep last 20 messages for context
   const history = aiHistory.slice(-20);
-  const chat = model.startChat({ history });
 
-  const result = await chat.sendMessage(userPrompt);
-  const content = result.response.text();
+  const result = await mistral.chat.complete({
+    model: env.MISTRAL_MODEL,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      ...history,
+      { role: 'user', content: userPrompt },
+    ],
+    responseFormat: { type: 'json_object' },
+    maxTokens: 2000,
+    temperature: 0.85,
+  });
 
-  if (!content) throw new Error('Empty AI response');
+  const content = result.choices?.[0]?.message?.content;
+  if (!content || typeof content !== 'string') throw new Error('Empty AI response');
 
   // Parse and validate
   const rawParsed = narrationResponseSchema.parse(JSON.parse(content));
@@ -46,8 +45,8 @@ export async function generateNarration(
 
   const updatedHistory: ChatMessage[] = [
     ...aiHistory,
-    { role: 'user', parts: [{ text: userPrompt }] },
-    { role: 'model', parts: [{ text: content }] },
+    { role: 'user', content: userPrompt },
+    { role: 'assistant', content },
   ];
 
   return { narration, updatedHistory };
@@ -57,15 +56,16 @@ export async function generateCombatNarration(
   turnDescription: string,
   context: SceneContext,
 ): Promise<string> {
-  const model = genAI.getGenerativeModel({
-    model: env.GEMINI_MODEL,
-    systemInstruction: buildCombatNarrationPrompt(context),
-    generationConfig: {
-      maxOutputTokens: 200,
-      temperature: 0.9,
-    },
+  const result = await mistral.chat.complete({
+    model: env.MISTRAL_MODEL,
+    messages: [
+      { role: 'system', content: buildCombatNarrationPrompt(context) },
+      { role: 'user', content: turnDescription },
+    ],
+    maxTokens: 200,
+    temperature: 0.9,
   });
 
-  const result = await model.generateContent(turnDescription);
-  return result.response.text() || turnDescription;
+  const content = result.choices?.[0]?.message?.content;
+  return (typeof content === 'string' ? content : null) || turnDescription;
 }

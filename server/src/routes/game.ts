@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { validate } from '../middleware/validate';
 import { MakeChoiceSchema } from '@txtrpg/shared';
 import { prisma } from '../lib/prisma';
-import { generateNarration } from '../services/ai/gemini';
+import { generateNarration } from '../services/ai/mistral';
 import type { Character, GameState, NarrativeEntry, SceneContext, PreviousChoice } from '@txtrpg/shared';
 
 export const gameRouter = Router();
