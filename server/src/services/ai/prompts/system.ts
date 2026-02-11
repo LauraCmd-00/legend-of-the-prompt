@@ -56,6 +56,7 @@ ${previousChoicesBlock}
 3. **Cohérence thématique** : tout le vocabulaire, la technologie, les noms propres et l'ambiance correspondent au thème choisi.
 4. **Variété des scènes** : alterne entre exploration, dialogue, dilemme moral, énigme, combat, révélation. Ne jamais enchaîner deux scènes du même type.
 5. **Tension progressive** : la difficulté et les enjeux augmentent de chapitre en chapitre.
+8. **Combats** : Utilise le scene_type "combat_intro" quand une confrontation physique est inévitable ou quand le joueur a choisi une action agressive. Le moteur de jeu déclenchera alors une phase de combat tour par tour séparée. Utilise "boss_intro" pour les combats importants (fin de chapitre, antagoniste principal). Prévois au moins 1-2 combats par chapitre pour maintenir l'action. La narration doit décrire la tension montante et l'apparition de l'ennemi, sans résoudre le combat dans le texte.
 6. **Contenu SFW** : pas de gore explicite, pas de contenu sexuel, pas de contenu discriminatoire.
 7. **Rejouabilité** : à chaque nouvelle partie sur le même thème, propose des personnages secondaires différents, des lieux différents, un antagoniste différent, des objectifs différents.
 

@@ -3,7 +3,8 @@ import { validate } from '../middleware/validate';
 import { MakeChoiceSchema } from '@txtrpg/shared';
 import { prisma } from '../lib/prisma';
 import { generateNarration } from '../services/ai/mistral';
-import type { Character, GameState, NarrativeEntry, SceneContext, PreviousChoice } from '@txtrpg/shared';
+import { generateEnemy, getCategoryForScene } from '../services/combat/enemy-generator';
+import type { Character, GameState, NarrativeEntry, SceneContext, PreviousChoice, CombatState } from '@txtrpg/shared';
 
 export const gameRouter = Router();
 
@@ -122,8 +123,25 @@ gameRouter.post('/choice', validate(MakeChoiceSchema), async (req, res, next) =>
     // Determine phase from scene type
     let phase = game.phase;
     const sceneType = narration.meta.sceneType;
+    let combatData: string | null = game.combatData;
+
     if (sceneType === 'combat_intro' || sceneType === 'boss_intro') {
       phase = 'combat';
+
+      // Generate enemy and initialize combat state
+      const category = getCategoryForScene(sceneType, chapter);
+      const enemy = generateEnemy(character.theme, chapter, character.level, category);
+      const combatState: CombatState = {
+        id: `combat_${Date.now()}`,
+        enemy,
+        playerHp: character.hp,
+        playerMp: character.mp,
+        enemyHp: enemy.hp,
+        turns: [],
+        currentTurn: 1,
+        phase: 'player_action',
+      };
+      combatData = JSON.stringify(combatState);
     } else if (sceneType === 'resolution' && chapter === 5 && subChapter === 3) {
       phase = 'victory';
     }
@@ -136,10 +154,13 @@ gameRouter.post('/choice', validate(MakeChoiceSchema), async (req, res, next) =>
         subChapter,
         eventIndex,
         phase,
+        combatData,
         narrativeData: JSON.stringify(narrativeHistory),
         aiContextData: JSON.stringify(updatedHistory),
       },
     });
+
+    const combat = combatData ? JSON.parse(combatData) as CombatState : undefined;
 
     res.json({
       success: true,
@@ -151,6 +172,7 @@ gameRouter.post('/choice', validate(MakeChoiceSchema), async (req, res, next) =>
           inventory: JSON.parse(game.inventoryData),
           chapter: { chapterNumber: chapter, subChapterNumber: subChapter, eventIndex, totalEvents: 4 },
           phase,
+          combat,
           narrativeHistory,
           isPremium: game.player.isPremium,
           createdAt: game.createdAt.toISOString(),

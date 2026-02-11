@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import Button from '../components/ui/Button';
 import ProgressBar from '../components/ui/ProgressBar';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { useCombatStore } from '../stores/useCombatStore';
@@ -17,7 +16,7 @@ export default function CombatPage() {
   const navigate = useNavigate();
 
   const { combat, lastNarration, setCombat, setNarration, reset } = useCombatStore();
-  const gameState = useGameStore((s) => s.gameState);
+  const { gameState, setGameState } = useGameStore();
 
   const [subMenu, setSubMenu] = useState<SubMenu>('none');
   const [isActing, setIsActing] = useState(false);
@@ -41,16 +40,21 @@ export default function CombatPage() {
     setIsActing(true);
     setSubMenu('none');
     try {
-      const result = await api.combatAction({
-        gameId,
-        action,
-        ...extra,
-      });
+      const result = await api.combatAction({ gameId, action, ...extra });
       setCombat(result.combat);
       setNarration(result.narration);
 
+      // Sync character updates back to game store
+      if (result.character && gameState) {
+        setGameState({ ...gameState, character: result.character });
+      }
+
       if (result.combat.phase === 'victory' || result.combat.phase === 'defeat') {
-        setTimeout(() => navigate(`/game/${gameId}`), 2000);
+        setTimeout(() => {
+          // Clear narration so GamePage reloads a fresh scene
+          useGameStore.getState().setNarration(null as never);
+          navigate(`/game/${gameId}`);
+        }, 2500);
       }
     } catch (err) {
       console.error('Combat action failed:', err);
@@ -61,102 +65,169 @@ export default function CombatPage() {
 
   if (!combat || !gameState) return <LoadingSpinner />;
 
+  const ch = gameState.character;
   const isEnded = combat.phase === 'victory' || combat.phase === 'defeat';
+  const recentTurns = combat.turns.slice(-6);
 
   return (
-    <div className="flex flex-col min-h-dvh pb-20">
-      {/* Enemy */}
-      <div className="p-4 border-b border-rpg-border">
-        <h2 className="text-lg font-bold mb-2">{combat.enemy.name}</h2>
-        <ProgressBar value={combat.enemyHp} max={combat.enemy.maxHp} color="bg-rpg-danger" label={t('combat.hp')} />
+    <div className="h-dvh flex flex-col p-2 gap-2">
+      {/* ── Enemy panel ── */}
+      <div className="border border-white p-3 shrink-0">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm font-bold uppercase tracking-wider">{combat.enemy.name}</span>
+          <span className="text-[10px] text-rpg-muted uppercase tracking-wider">
+            {combat.enemy.category} Niv.{combat.enemy.level}
+          </span>
+        </div>
+        <ProgressBar value={combat.enemyHp} max={combat.enemy.maxHp} color="bg-rpg-danger" label="PV" />
       </div>
 
-      {/* Combat log */}
-      <div className="flex-1 px-4 py-4 overflow-y-auto">
-        {lastNarration && (
-          <p className="text-sm text-rpg-muted mb-4 leading-relaxed">{lastNarration}</p>
-        )}
-        {combat.turns.slice(-6).map((turn, i) => (
-          <div key={i} className={`text-sm mb-1 ${turn.actorType === 'player' ? 'text-rpg-accent' : 'text-rpg-danger'}`}>
-            {turn.narration}
-          </div>
-        ))}
-        {isEnded && (
-          <div className={`text-2xl font-bold text-center mt-6 ${combat.phase === 'victory' ? 'text-rpg-gold' : 'text-rpg-danger'}`}>
-            {combat.phase === 'victory' ? t('combat.victory') : t('combat.defeat')}
-            {combat.xpGained && <div className="text-sm text-rpg-muted mt-1">+{combat.xpGained} XP, +{combat.goldGained} Gold</div>}
-          </div>
-        )}
+      {/* ── Combat log (scrollable) ── */}
+      <div className="flex-1 border border-white flex flex-col min-h-0">
+        <div className="px-3 py-1.5 border-b border-white/30 shrink-0">
+          <span className="text-xs font-bold uppercase tracking-wider">Combat</span>
+        </div>
+        <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
+          {lastNarration && (
+            <p className="text-xs text-rpg-muted leading-relaxed italic mb-2">{lastNarration}</p>
+          )}
+          {recentTurns.map((turn, i) => (
+            <div
+              key={i}
+              className={`text-xs leading-relaxed ${
+                turn.actorType === 'player' ? 'text-white' : 'text-rpg-danger'
+              }`}
+            >
+              <span className="text-rpg-muted mr-1">{turn.actorType === 'player' ? '>' : '<'}</span>
+              {turn.narration}
+              {turn.isCritical && <span className="text-rpg-gold ml-1">CRIT!</span>}
+              {turn.isDodged && <span className="text-rpg-muted ml-1">MISS</span>}
+            </div>
+          ))}
+
+          {/* Victory / Defeat overlay */}
+          {isEnded && (
+            <div className="text-center py-6">
+              <div className={`text-2xl font-bold uppercase tracking-widest ${
+                combat.phase === 'victory' ? 'text-rpg-gold' : 'text-rpg-danger'
+              }`}>
+                {combat.phase === 'victory' ? 'Victoire' : 'Defaite'}
+              </div>
+              {combat.phase === 'victory' && (combat.xpGained || combat.goldGained) && (
+                <div className="text-xs text-rpg-muted mt-2 space-y-1">
+                  {combat.xpGained && <div>+{combat.xpGained} XP</div>}
+                  {combat.goldGained && <div>+{combat.goldGained} Or</div>}
+                </div>
+              )}
+              <div className="text-[10px] text-rpg-muted mt-3 animate-pulse">
+                Retour a l'aventure...
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Player status */}
-      <div className="px-4 mb-2">
-        <ProgressBar value={combat.playerHp} max={gameState.character.maxHp} color="bg-rpg-success" label={t('combat.hp')} />
+      {/* ── Player status ── */}
+      <div className="border border-white p-2 shrink-0 space-y-1.5">
+        <ProgressBar value={combat.playerHp} max={ch.maxHp} color="bg-rpg-hp" label="PV" />
+        <ProgressBar value={combat.playerMp} max={ch.maxMp} color="bg-rpg-mana" label="PM" />
       </div>
 
-      {/* Actions */}
+      {/* ── Actions ── */}
       {!isEnded && (
-        <div className="px-4 pb-4">
+        <div className="shrink-0">
           {subMenu === 'none' && (
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="primary" onClick={() => setSubMenu('attack')} disabled={isActing}>
-                {t('combat.attack')}
-              </Button>
-              <Button variant="secondary" onClick={() => doAction('defend', { defenseTimingScore: 0.7 })} disabled={isActing}>
-                {t('combat.defend')}
-              </Button>
-              <Button variant="secondary" onClick={() => setSubMenu('item')} disabled={isActing}>
-                {t('combat.item')}
-              </Button>
-              <Button variant="danger" onClick={() => setSubMenu('flee')} disabled={isActing}>
-                {t('combat.flee')}
-              </Button>
+            <div className="grid grid-cols-2 gap-1.5">
+              <button
+                disabled={isActing}
+                onClick={() => setSubMenu('attack')}
+                className="border border-white py-3 text-xs uppercase tracking-wider hover:bg-white/10 transition-all active:scale-95 disabled:opacity-30"
+              >
+                Attaquer
+              </button>
+              <button
+                disabled={isActing}
+                onClick={() => doAction('defend', { defenseTimingScore: 0.7 })}
+                className="border border-white/50 py-3 text-xs uppercase tracking-wider text-white/70 hover:bg-white/10 transition-all active:scale-95 disabled:opacity-30"
+              >
+                Defendre
+              </button>
+              <button
+                disabled={isActing}
+                onClick={() => setSubMenu('item')}
+                className="border border-white/50 py-3 text-xs uppercase tracking-wider text-white/70 hover:bg-white/10 transition-all active:scale-95 disabled:opacity-30"
+              >
+                Objet
+              </button>
+              <button
+                disabled={isActing}
+                onClick={() => setSubMenu('flee')}
+                className="border border-rpg-danger/50 py-3 text-xs uppercase tracking-wider text-rpg-danger hover:bg-rpg-danger/10 transition-all active:scale-95 disabled:opacity-30"
+              >
+                Fuir
+              </button>
             </div>
           )}
 
           {subMenu === 'attack' && (
-            <div className="space-y-2">
-              <Button className="w-full" onClick={() => doAction('attack', { attackType: 'mainWeapon' })}>
-                {t('combat.mainWeapon')}
-              </Button>
-              <Button variant="secondary" className="w-full" onClick={() => doAction('attack', { attackType: 'secondaryWeapon' })}>
-                {t('combat.secondaryWeapon')}
-              </Button>
-              <Button variant="gold" className="w-full" onClick={() => doAction('attack', { attackType: 'spell' })}>
-                {t('combat.spell')}
-              </Button>
-              <Button variant="secondary" size="sm" onClick={() => setSubMenu('none')}>
-                ← Back
-              </Button>
+            <div className="space-y-1.5">
+              <button
+                onClick={() => doAction('attack', { attackType: 'mainWeapon' })}
+                className="w-full border border-white py-3 text-xs uppercase tracking-wider hover:bg-white/10 transition-all active:scale-95"
+              >
+                Arme Principale
+              </button>
+              <button
+                onClick={() => doAction('attack', { attackType: 'spell' })}
+                className="w-full border border-rpg-mana/50 py-3 text-xs uppercase tracking-wider text-rpg-mana hover:bg-rpg-mana/10 transition-all active:scale-95"
+              >
+                Sort
+              </button>
+              <button
+                onClick={() => setSubMenu('none')}
+                className="w-full border border-white/30 py-2 text-[10px] uppercase tracking-wider text-rpg-muted hover:bg-white/10 transition-all"
+              >
+                Retour
+              </button>
             </div>
           )}
 
           {subMenu === 'flee' && (
-            <div className="space-y-2">
-              <p className="text-sm text-rpg-muted text-center mb-2">{t('combat.rps.instruction')}</p>
-              <div className="grid grid-cols-3 gap-2">
+            <div className="space-y-1.5">
+              <p className="text-[10px] text-rpg-muted text-center uppercase tracking-wider mb-1">
+                Pierre - Feuille - Ciseaux
+              </p>
+              <div className="grid grid-cols-3 gap-1.5">
                 {(['rock', 'paper', 'scissors'] as RPSChoice[]).map((choice) => (
-                  <Button
+                  <button
                     key={choice}
-                    variant="secondary"
                     onClick={() => doAction('flee', { fleeChoice: choice })}
+                    className="border border-white/50 py-3 text-xs uppercase tracking-wider hover:bg-white/10 transition-all active:scale-95"
                   >
-                    {t(`combat.rps.${choice}`)}
-                  </Button>
+                    {choice === 'rock' ? 'Pierre' : choice === 'paper' ? 'Feuille' : 'Ciseaux'}
+                  </button>
                 ))}
               </div>
-              <Button variant="secondary" size="sm" onClick={() => setSubMenu('none')}>
-                ← Back
-              </Button>
+              <button
+                onClick={() => setSubMenu('none')}
+                className="w-full border border-white/30 py-2 text-[10px] uppercase tracking-wider text-rpg-muted hover:bg-white/10 transition-all"
+              >
+                Retour
+              </button>
             </div>
           )}
 
           {subMenu === 'item' && (
-            <div className="space-y-2">
-              <p className="text-sm text-rpg-muted text-center">No items available</p>
-              <Button variant="secondary" size="sm" onClick={() => setSubMenu('none')}>
-                ← Back
-              </Button>
+            <div className="space-y-1.5">
+              <p className="text-[10px] text-rpg-muted text-center uppercase tracking-wider py-3">
+                Aucun objet disponible
+              </p>
+              <button
+                onClick={() => setSubMenu('none')}
+                className="w-full border border-white/30 py-2 text-[10px] uppercase tracking-wider text-rpg-muted hover:bg-white/10 transition-all"
+              >
+                Retour
+              </button>
             </div>
           )}
         </div>

@@ -51,6 +51,7 @@ export interface CombatActionRequest {
 
 export interface CombatActionResponse {
   combat: CombatState;
+  character?: Character;
   narration: string;
 }
 

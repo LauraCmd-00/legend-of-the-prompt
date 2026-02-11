@@ -86,16 +86,21 @@ combatRouter.post('/action', validate(CombatActionSchema), async (req, res, next
           playerTurn.narration = narration;
           combat.turns.push(playerTurn);
 
+          // Sync HP back to character
+          character.hp = combat.playerHp;
+          character.mp = combat.playerMp;
+
           await prisma.game.update({
             where: { id: gameId },
             data: {
               combatData: null,
+              characterData: JSON.stringify(character),
               phase: 'exploration',
               inventoryData: JSON.stringify(inventory),
             },
           });
 
-          res.json({ success: true, data: { combat, narration } });
+          res.json({ success: true, data: { combat, character, narration } });
           return;
         } else {
           narration = `${character.name} tries to flee but fails!`;
@@ -114,16 +119,34 @@ combatRouter.post('/action', validate(CombatActionSchema), async (req, res, next
       combat.goldGained = combat.enemy.goldReward;
       narration += ` Victory! Gained ${combat.enemy.xpReward} XP and ${combat.enemy.goldReward} gold.`;
 
+      // Sync XP and HP back to character
+      character.xp += combat.enemy.xpReward;
+      character.hp = combat.playerHp;
+      character.mp = combat.playerMp;
+
+      // Level up check
+      while (character.xp >= character.xpToNextLevel) {
+        character.xp -= character.xpToNextLevel;
+        character.level++;
+        character.xpToNextLevel = Math.floor(100 * Math.pow(1.5, character.level - 1));
+        character.unallocatedPoints += 3;
+        character.maxHp += 10;
+        character.maxMp += 8;
+        character.hp = character.maxHp;
+        character.mp = character.maxMp;
+      }
+
       await prisma.game.update({
         where: { id: gameId },
         data: {
           combatData: JSON.stringify(combat),
+          characterData: JSON.stringify(character),
           phase: 'exploration',
           inventoryData: JSON.stringify(inventory),
         },
       });
 
-      res.json({ success: true, data: { combat, narration } });
+      res.json({ success: true, data: { combat, character, narration } });
       return;
     }
 
@@ -147,15 +170,20 @@ combatRouter.post('/action', validate(CombatActionSchema), async (req, res, next
     // Check player defeat
     if (combat.playerHp <= 0) {
       combat.phase = 'defeat';
+      character.hp = 0;
     } else {
       combat.phase = 'player_action';
       combat.currentTurn++;
+      // Sync HP back to character
+      character.hp = combat.playerHp;
+      character.mp = combat.playerMp;
     }
 
     await prisma.game.update({
       where: { id: gameId },
       data: {
         combatData: JSON.stringify(combat),
+        characterData: JSON.stringify(character),
         phase: combat.phase === 'defeat' ? 'game_over' : 'combat',
         inventoryData: JSON.stringify(inventory),
       },
@@ -165,6 +193,7 @@ combatRouter.post('/action', validate(CombatActionSchema), async (req, res, next
       success: true,
       data: {
         combat,
+        character,
         narration: `${narration} ${enemyTurn.narration}`,
       },
     });

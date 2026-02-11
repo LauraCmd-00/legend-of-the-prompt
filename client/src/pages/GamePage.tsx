@@ -23,10 +23,16 @@ export default function GamePage() {
     async function loadGameAndNarration() {
       setLoading(true);
       try {
-        if (!gameState || gameState.id !== gameId) {
-          const state = await api.loadGame(gameId!);
-          setGameState(state);
+        // Always reload game state to get latest character data (post-combat HP/XP)
+        const state = await api.loadGame(gameId!);
+        setGameState(state);
+
+        // If game is in combat phase, redirect to combat page
+        if (state.phase === 'combat') {
+          navigate(`/combat/${gameId}`);
+          return;
         }
+
         if (!currentNarration) {
           const narration = await api.getNarration(gameId!);
           setNarration(narration);
@@ -38,9 +44,7 @@ export default function GamePage() {
       }
     }
 
-    if (!gameState || gameState.id !== gameId || !currentNarration) {
-      loadGameAndNarration();
-    }
+    loadGameAndNarration();
   }, [gameId]);
 
   async function handleChoice(choiceId: string) {
