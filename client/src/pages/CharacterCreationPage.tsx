@@ -31,7 +31,7 @@ export default function CharacterCreationPage() {
     if (!canStart || !theme || !archetype) return;
     setIsSubmitting(true);
     try {
-      const result = await api.createCharacter({ name: name.trim(), theme, archetype, stats });
+      const result = await api.createCharacter({ name: name.trim(), theme, archetype, perspective: 'tu', stats });
       setGameState(result.gameState);
       setSessionToken(result.sessionToken);
       navigate(`/game/${result.gameState.id}`);

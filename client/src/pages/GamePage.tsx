@@ -5,7 +5,6 @@ import Button from '../components/ui/Button';
 import ProgressBar from '../components/ui/ProgressBar';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { useGameStore } from '../stores/useGameStore';
-import { useSettingsStore } from '../stores/useSettingsStore';
 import { api } from '../services/api';
 import type { NarrationResponse } from '@txtrpg/shared';
 
@@ -13,7 +12,6 @@ export default function GamePage() {
   const { t } = useTranslation();
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
-  const textOnly = useSettingsStore((s) => s.textOnly);
 
   const { gameState, currentNarration, isLoading, setGameState, setNarration, setLoading } = useGameStore();
   const [choosingId, setChoosingId] = useState<string | null>(null);
@@ -79,23 +77,15 @@ export default function GamePage() {
         />
       </div>
 
-      {/* Scene image */}
-      {!textOnly && currentNarration?.imageUrl && (
-        <div className="w-full h-48 bg-rpg-surface overflow-hidden">
-          <img
-            src={currentNarration.imageUrl}
-            alt="Scene"
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )}
-
-      {/* Narration text */}
+      {/* Scene title & narration */}
       <div className="flex-1 px-4 py-6">
         {currentNarration ? (
-          <p className="text-base leading-relaxed whitespace-pre-line">
-            {currentNarration.text}
-          </p>
+          <>
+            <h2 className="text-lg font-bold text-rpg-accent mb-3">{currentNarration.sceneTitle}</h2>
+            <p className="text-base leading-relaxed whitespace-pre-line">
+              {currentNarration.narrative}
+            </p>
+          </>
         ) : (
           <p className="text-rpg-muted italic">{t('game.loading')}</p>
         )}
@@ -131,7 +121,7 @@ export default function GamePage() {
               disabled={!!choosingId}
               onClick={() => handleChoice(choice.id)}
             >
-              {choosingId === choice.id ? '...' : choice.text}
+              {choosingId === choice.id ? '...' : choice.label}
               {choice.isPremium && ' ★'}
             </Button>
           ))}

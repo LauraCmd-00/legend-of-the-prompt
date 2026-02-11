@@ -4,7 +4,7 @@ import { RPS_WINS, FLEE_BASE_CHANCE, FLEE_LUCK_BONUS } from '@txtrpg/shared';
 export function resolveFleeAttempt(
   playerChoice: RPSChoice,
   playerLuck: number,
-): { enemyChoice: RPSChoice; success: boolean } {
+): { playerChoice: RPSChoice; enemyChoice: RPSChoice; success: boolean } {
   const choices: RPSChoice[] = ['rock', 'paper', 'scissors'];
   const enemyChoice = choices[Math.floor(Math.random() * 3)];
 
@@ -18,5 +18,5 @@ export function resolveFleeAttempt(
     success = Math.random() < fleeChance;
   }
 
-  return { enemyChoice, success };
+  return { playerChoice, enemyChoice, success };
 }

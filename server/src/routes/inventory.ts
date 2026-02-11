@@ -48,7 +48,7 @@ inventoryRouter.post('/equip', validate(EquipItemSchema), async (req, res, next)
     }
 
     // Equip new item
-    (inventory.equipped as Record<string, Item | null>)[equipSlot] = item;
+    (inventory.equipped as unknown as Record<string, Item | null>)[equipSlot] = item;
     inventory.backpack.splice(itemIndex, 1);
 
     await prisma.game.update({
@@ -82,7 +82,7 @@ inventoryRouter.post('/unequip', async (req, res, next) => {
     }
 
     inventory.backpack.push(item);
-    (inventory.equipped as Record<string, Item | null>)[equipSlot] = null;
+    (inventory.equipped as unknown as Record<string, Item | null>)[equipSlot] = null;
 
     await prisma.game.update({
       where: { id: gameId },

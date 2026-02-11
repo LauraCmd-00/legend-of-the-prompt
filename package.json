@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
     "build": "npm run build -w shared && npm run build -w server && npm run build -w client",
+    "build:vercel": "npm run build -w shared && cd server && npx prisma generate && cd .. && npm run build -w client",
     "build:shared": "npm run build -w shared",
     "db:push": "npm run db:push -w server",
     "db:seed": "npm run db:seed -w server",
