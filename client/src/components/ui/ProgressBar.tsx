@@ -6,20 +6,21 @@ interface ProgressBarProps {
   showValue?: boolean;
 }
 
-export default function ProgressBar({ value, max, color = 'bg-rpg-accent', label, showValue = true }: ProgressBarProps) {
-  const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0;
+export default function ProgressBar({ value, max, color, label, showValue = true }: ProgressBarProps) {
+  const pct = Math.max(0, Math.min(100, (value / max) * 100));
+  const fillColor = color || 'bg-white';
 
   return (
-    <div className="w-full">
+    <div className="flex-1">
       {(label || showValue) && (
-        <div className="flex justify-between text-xs text-rpg-muted mb-1">
-          {label && <span>{label}</span>}
+        <div className="flex justify-between text-[10px] text-rpg-muted mb-0.5">
+          {label && <span className="uppercase tracking-wider">{label}</span>}
           {showValue && <span>{value}/{max}</span>}
         </div>
       )}
-      <div className="w-full h-3 bg-rpg-border rounded-full overflow-hidden">
+      <div className="h-2 border border-white/30 bg-transparent">
         <div
-          className={`h-full rounded-full transition-all duration-300 ${color}`}
+          className={`h-full ${fillColor} transition-all duration-300`}
           style={{ width: `${pct}%` }}
         />
       </div>

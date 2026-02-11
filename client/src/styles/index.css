@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 @theme {
-  --color-rpg-bg: #0f172a;
-  --color-rpg-surface: #1e293b;
-  --color-rpg-border: #334155;
-  --color-rpg-text: #e2e8f0;
-  --color-rpg-muted: #94a3b8;
-  --color-rpg-accent: #8b5cf6;
-  --color-rpg-accent-hover: #7c3aed;
+  --color-rpg-bg: #000000;
+  --color-rpg-surface: #0a0a0a;
+  --color-rpg-border: #ffffff;
+  --color-rpg-text: #ffffff;
+  --color-rpg-muted: #888888;
+  --color-rpg-accent: #ffffff;
+  --color-rpg-accent-hover: #cccccc;
   --color-rpg-gold: #f59e0b;
   --color-rpg-danger: #ef4444;
   --color-rpg-success: #22c55e;

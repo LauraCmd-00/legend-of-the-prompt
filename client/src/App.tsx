@@ -6,7 +6,6 @@ import GamePage from './pages/GamePage';
 import CombatPage from './pages/CombatPage';
 import InventoryPage from './pages/InventoryPage';
 import SettingsPage from './pages/SettingsPage';
-import MobileNav from './components/layout/MobileNav';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 
 export default function App() {
@@ -23,7 +22,6 @@ export default function App() {
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>
         </main>
-        <MobileNav />
       </div>
     </Suspense>
   );

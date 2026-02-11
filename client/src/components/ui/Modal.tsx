@@ -12,9 +12,13 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative bg-rpg-surface border border-rpg-border rounded-2xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
-        {title && <h2 className="text-xl font-bold mb-4">{title}</h2>}
+      <div className="absolute inset-0 bg-black/80" onClick={onClose} />
+      <div className="relative bg-black border border-white p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
+        {title && (
+          <h2 className="text-sm font-bold uppercase tracking-widest mb-4 pb-2 border-b border-white/30">
+            {title}
+          </h2>
+        )}
         {children}
       </div>
     </div>
