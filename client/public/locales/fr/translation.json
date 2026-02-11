@@ -1,0 +1,116 @@
+{
+  "app": {
+    "title": "TextRPG",
+    "subtitle": "Aventure propulsée par l'IA"
+  },
+  "home": {
+    "newGame": "Nouvelle Aventure",
+    "continueGame": "Continuer",
+    "settings": "Paramètres"
+  },
+  "character": {
+    "creation": {
+      "title": "Créez votre héros",
+      "name": "Nom du personnage",
+      "namePlaceholder": "Entrez un nom...",
+      "chooseTheme": "Choisissez votre monde",
+      "chooseArchetype": "Choisissez votre voie",
+      "allocateStats": "Répartir les stats",
+      "pointsRemaining": "Points restants : {{points}}",
+      "startAdventure": "Commencer l'aventure"
+    }
+  },
+  "themes": {
+    "scifi": "Sci-Fi",
+    "medieval": "Médiéval Fantastique",
+    "steampunk": "Steampunk"
+  },
+  "archetypes": {
+    "warrior": "Guerrier",
+    "rogue": "Éclaireur",
+    "mage": "Mage",
+    "healer": "Guérisseur",
+    "ranger": "Rôdeur"
+  },
+  "stats": {
+    "force": "Force",
+    "dexterity": "Dextérité",
+    "intelligence": "Intelligence",
+    "spirit": "Esprit",
+    "luck": "Chance"
+  },
+  "game": {
+    "chapter": "Chapitre {{chapter}}",
+    "subchapter": "Partie {{sub}}",
+    "loading": "L'histoire se dévoile..."
+  },
+  "combat": {
+    "attack": "Attaquer",
+    "defend": "Défendre",
+    "item": "Objet",
+    "flee": "Fuir",
+    "mainWeapon": "Arme principale",
+    "secondaryWeapon": "Arme secondaire",
+    "spell": "Lancer un sort",
+    "victory": "Victoire !",
+    "defeat": "Défaite...",
+    "yourTurn": "Votre tour",
+    "enemyTurn": "Tour ennemi",
+    "hp": "PV",
+    "mp": "PM",
+    "timing": {
+      "instruction": "Appuyez quand la barre atteint le centre !",
+      "perfect": "Parade parfaite !",
+      "good": "Bonne parade !",
+      "partial": "Parade partielle",
+      "failed": "Parade ratée !"
+    },
+    "rps": {
+      "instruction": "Choisissez votre coup ! (3 secondes)",
+      "rock": "Pierre",
+      "paper": "Feuille",
+      "scissors": "Ciseaux",
+      "success": "Vous vous êtes échappé !",
+      "failure": "Impossible de fuir !"
+    }
+  },
+  "inventory": {
+    "title": "Inventaire",
+    "equipment": "Équipement",
+    "backpack": "Sac à dos",
+    "gold": "Or",
+    "empty": "Vide",
+    "equip": "Équiper",
+    "unequip": "Déséquiper",
+    "slots": {
+      "helmet": "Casque",
+      "armor": "Armure",
+      "gloveLeft": "Gant gauche",
+      "gloveRight": "Gant droit",
+      "leggings": "Jambières",
+      "boots": "Bottes",
+      "ring": "Anneau",
+      "mainWeapon": "Arme principale",
+      "secondaryWeapon": "Arme secondaire"
+    }
+  },
+  "premium": {
+    "unlock": "Débloquer Premium",
+    "description": "Obtenez un 4e choix pour plus de créativité !",
+    "price": "2,99 €",
+    "active": "Premium Actif"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "textOnly": "Mode texte uniquement",
+    "fontSize": "Taille de police",
+    "premium": "Statut Premium"
+  },
+  "nav": {
+    "home": "Accueil",
+    "game": "Aventure",
+    "inventory": "Inventaire",
+    "settings": "Paramètres"
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "app": {
+    "title": "TextRPG",
+    "subtitle": "AI-Powered Adventure"
+  },
+  "home": {
+    "newGame": "New Adventure",
+    "continueGame": "Continue",
+    "settings": "Settings"
+  },
+  "character": {
+    "creation": {
+      "title": "Create Your Hero",
+      "name": "Character Name",
+      "namePlaceholder": "Enter a name...",
+      "chooseTheme": "Choose Your World",
+      "chooseArchetype": "Choose Your Path",
+      "allocateStats": "Allocate Stats",
+      "pointsRemaining": "Points remaining: {{points}}",
+      "startAdventure": "Begin Adventure"
+    }
+  },
+  "themes": {
+    "scifi": "Sci-Fi",
+    "medieval": "Medieval Fantasy",
+    "steampunk": "Steampunk"
+  },
+  "archetypes": {
+    "warrior": "Warrior",
+    "rogue": "Rogue",
+    "mage": "Mage",
+    "healer": "Healer",
+    "ranger": "Ranger"
+  },
+  "stats": {
+    "force": "Force",
+    "dexterity": "Dexterity",
+    "intelligence": "Intelligence",
+    "spirit": "Spirit",
+    "luck": "Luck"
+  },
+  "game": {
+    "chapter": "Chapter {{chapter}}",
+    "subchapter": "Part {{sub}}",
+    "loading": "The story unfolds..."
+  },
+  "combat": {
+    "attack": "Attack",
+    "defend": "Defend",
+    "item": "Use Item",
+    "flee": "Flee",
+    "mainWeapon": "Main Weapon",
+    "secondaryWeapon": "Secondary Weapon",
+    "spell": "Cast Spell",
+    "victory": "Victory!",
+    "defeat": "Defeat...",
+    "yourTurn": "Your Turn",
+    "enemyTurn": "Enemy Turn",
+    "hp": "HP",
+    "mp": "MP",
+    "timing": {
+      "instruction": "Tap when the bar reaches the center!",
+      "perfect": "Perfect Block!",
+      "good": "Good Block!",
+      "partial": "Partial Block",
+      "failed": "Block Failed!"
+    },
+    "rps": {
+      "instruction": "Choose your move! (3 seconds)",
+      "rock": "Rock",
+      "paper": "Paper",
+      "scissors": "Scissors",
+      "success": "You escaped!",
+      "failure": "Couldn't escape!"
+    }
+  },
+  "inventory": {
+    "title": "Inventory",
+    "equipment": "Equipment",
+    "backpack": "Backpack",
+    "gold": "Gold",
+    "empty": "Empty",
+    "equip": "Equip",
+    "unequip": "Unequip",
+    "slots": {
+      "helmet": "Helmet",
+      "armor": "Armor",
+      "gloveLeft": "Left Glove",
+      "gloveRight": "Right Glove",
+      "leggings": "Leggings",
+      "boots": "Boots",
+      "ring": "Ring",
+      "mainWeapon": "Main Weapon",
+      "secondaryWeapon": "Secondary Weapon"
+    }
+  },
+  "premium": {
+    "unlock": "Unlock Premium",
+    "description": "Get a 4th choice option for more creative gameplay!",
+    "price": "$2.99",
+    "active": "Premium Active"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "textOnly": "Text Only Mode",
+    "fontSize": "Font Size",
+    "premium": "Premium Status"
+  },
+  "nav": {
+    "home": "Home",
+    "game": "Adventure",
+    "inventory": "Inventory",
+    "settings": "Settings"
+  }
+}

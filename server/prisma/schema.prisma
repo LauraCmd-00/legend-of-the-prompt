@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Player {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  isPremium    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  games        Game[]
+}
+
+model Game {
+  id          String   @id @default(uuid())
+  playerId    String
+  player      Player   @relation(fields: [playerId], references: [id])
+
+  // Character data stored as JSON for flexibility
+  characterData String  // JSON: Character type
+  inventoryData String  // JSON: Inventory type
+
+  // Game progression
+  chapter      Int     @default(1)
+  subChapter   Int     @default(1)
+  eventIndex   Int     @default(0)
+  phase        String  @default("exploration")
+
+  // Combat state (null when not in combat)
+  combatData   String? // JSON: CombatState type
+
+  // Narrative history
+  narrativeData String @default("[]") // JSON: NarrativeEntry[]
+
+  // AI conversation context (last N messages for continuity)
+  aiContextData String @default("[]") // JSON: OpenAI messages array
+
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([playerId])
+}
+
+model Item {
+  id              String  @id @default(uuid())
+  name            String
+  nameKey         String
+  description     String
+  descriptionKey  String
+  type            String  // weapon | armor | accessory | consumable
+  rarity          String  // common | uncommon | rare | epic | legendary
+  slot            String? // EquipmentSlot or null
+  modifiers       String  // JSON: StatModifier[]
+  levelRequirement Int    @default(1)
+  value           Int     @default(0)
+  healAmount      Int?
+  mpRestoreAmount Int?
+  theme           String? // Restrict items to themes, null = universal
+}
